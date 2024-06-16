@@ -26,7 +26,13 @@ jobs:
           source venv/bin/activate
           autopep8 --in-place --aggressive --aggressive --recursive backend/
           # Check if there are any changes made by autopep8
-          git diff --exit-code
+          if [[ `git status --porcelain` ]]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "Style: autopep8 formatting"
+            git push
+          fi
 
       - name: Run unittests
         run: |
