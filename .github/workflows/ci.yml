@@ -37,6 +37,7 @@ jobs:
       - name: Run unittests
         run: |
           source venv/bin/activate
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
           python -m unittest backend/test_flaskr.py
 
       - name: Clear GitHub Actions cache
