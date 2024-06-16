@@ -12,13 +12,6 @@ def create_app(test_config=None):
     # create and configure the app
     print("Creating Falsk app...")
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": "x"}})
-    print("Flask app created successfully")
-
-    # Example route for testing
-    @app.route("/test")
-    def test_route():
-        return "Flask app is running"
 
     if test_config is None:
         setup_db(app)
@@ -29,10 +22,22 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+    @app.after_request # used to modify the response object before it is sent to the client
+    def after_request(response):
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Cntrol-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-ALlow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+        return response
+
+
+    @app.route('/test')
+    def test_route():
+        return jsonify(message='Flask app is running!')
 
     """
     @TODO:
