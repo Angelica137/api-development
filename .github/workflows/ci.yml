@@ -8,15 +8,15 @@ jobs:
 
     steps:
       - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # Ensure the latest version supporting Node.js 20
         with:
           node-version: "20"
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Ensure the latest version supporting Node.js 20
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4 # Ensure the latest version supporting Node.js 20
         with:
           python-version: 3.7
 
@@ -39,7 +39,7 @@ jobs:
           python -m unittest discover -s backend/tests
 
       - name: Clear GitHub Actions cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4 # Ensure the latest version supporting Node.js 20
         with:
           path: ~/.cache
           key: ${{ runner.os }}-cache
