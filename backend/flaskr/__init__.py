@@ -82,14 +82,16 @@ def create_app(test_config=None):
     """
     @app.route('/questions', methods=['GET'])
     def get_questions():
+        page = request.args.get('page', 1, type=int)
+        questions = Question.query.paginate(page, per_page=10, error_out=False)
+
         try:
-            questions = Question.query.all()
-            formatted_questiosn = [question.format() for question in questions]
+            formatted_questiosn = [question.format() for question in questions.items]
 
             return jsonify({
                 'success': True,
                 'questions': formatted_questiosn,
-                'total_questions': len(questions)
+                'total_questions': questions.total
                 })
         except Exception as e:
             print(e)

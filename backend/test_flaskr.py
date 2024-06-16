@@ -45,12 +45,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIsInstance(data['categories'], dict)
 
     def test_get_questions(self):
-        res = self.client().get('/questions')
+        res = self.client().get('/questions?page=1')
         data = res.get_json()
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
-        self.assertTrue(len(data['questions']) > 0)
+        self.assertTrue(len(data['questions']) <= 10)
         self.assertIn('questions', data)
         # each q has multiple fields -> list of dictionaries
         self.assertIsInstance(data['questions'], list)
