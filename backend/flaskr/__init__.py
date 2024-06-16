@@ -80,6 +80,24 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for
     three pages. Clicking on the page numbers should update the questions.
     """
+    @app.route('/questions', methods=['GET'])
+    def get_questions():
+        try:
+            questions = Question.query.all()
+            formatted_questiosn = [question.format() for question in questions]
+
+            return jsonify({
+                'success': True,
+                'questions': formatted_questiosn,
+                'total_questions': len(questions)
+                })
+        except Exception as e:
+            print(e)
+            return jsonify({
+                'success': False,
+                'error': 500,
+                'message': 'An error occured while fetchin the questions'
+            }), 500
 
     """
     @TODO:
