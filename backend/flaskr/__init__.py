@@ -86,7 +86,9 @@ def create_app(test_config=None):
         questions = Question.query.paginate(page, per_page=10, error_out=False)
 
         try:
-            formatted_questiosn = [question.format() for question in questions.items]
+            formatted_questiosn = [
+                question.format() for question in questions.items
+                                ]
 
             return jsonify({
                 'success': True,
