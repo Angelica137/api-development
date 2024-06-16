@@ -10,7 +10,15 @@ QUESTIONS_PER_PAGE = 10
 
 def create_app(test_config=None):
     # create and configure the app
+    print("Creating Falsk app...")
     app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "x"}})
+    print("Flask app created successfully")
+
+    # Example route for testing
+    @app.route("/test")
+    def test_route():
+        return "Flask app is running"
 
     if test_config is None:
         setup_db(app)
@@ -103,5 +111,9 @@ def create_app(test_config=None):
     including 404 and 422.
     """
 
+    print("Flask app created successfully")
     return app
 
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)
