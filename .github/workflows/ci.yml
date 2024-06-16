@@ -8,10 +8,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3 # Updated to use v3
+        uses: actions/checkout@v3
+        with:
+          node-version: "20" # Explicitly specify Node.js 20
 
       - name: Set up Python
-        uses: actions/setup-python@v4 # Updated to use v4
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
@@ -32,3 +34,12 @@ jobs:
         run: |
           source venv/bin/activate
           python -m unittest discover -s backend/tests
+
+      - name: Clear GitHub Actions cache
+      run: |
+        actions/cache@v3
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-cache
+          restore-keys: |
+            ${{ runner.os }}-cache
