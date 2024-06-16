@@ -59,14 +59,14 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'categories': categories_dict
-						})
+            })
         except Exception as e:
             print(e)
             return jsonify({
                 'success': False,
                 'error': 500,
                 'message': 'An error occured while fetching categories.'
-						}), 500
+            }), 500
 
     """
     @TODO:
@@ -77,8 +77,8 @@ def create_app(test_config=None):
 
     TEST: At this point, when you start the application
     you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions.
+    ten questions per page and pagination at the bottom of the screen for
+    three pages. Clicking on the page numbers should update the questions.
     """
 
     """

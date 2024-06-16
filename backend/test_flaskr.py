@@ -29,7 +29,7 @@ class TriviaTestCase(unittest.TestCase):
     """
     TODO
     Write at least one test for each test for successful operation and for
-    expected errors.
+    expected errors. - DONE
     """
     def test_get_categories(self):
         res = self.client().get('/categories')
@@ -43,6 +43,32 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIn('categories', data)
         # check categories is a dictionary
         self.assertIsInstance(data['categories'], dict)
+
+    def test_get_questions(self):
+        res = self.client().get('/questions')
+        data = res.get_json()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(len(data['questions']) > 0)
+        self.assertIn('questions', data)
+        # each q has multiple fields -> list of dictionaries
+        self.assertIsInstance(data['questions'], list)
+
+        # checks structure of first question if it exists
+        if len(data['questions']) > 0:
+            question = data['questions'][0]
+            self.assertIn('id', question)
+            self.assertIn('question', question)
+            self.assertIn('question', question)
+            self.assertIn('answer', question)
+            self.assertIn('difficulty', question)
+            self.assertIn('category', question)
+            self.assertIsInstance(question['id'], int)
+            self.assertIsInstance(question['question'], str)
+            self.assertIsInstance(question['answer'], str)
+            self.assertIsInstance(question['difficulty'], int)
+            self.assertIsInstance(question['category'], int)
 
 
 # Make the tests conveniently executable
