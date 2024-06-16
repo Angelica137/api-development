@@ -48,6 +48,25 @@ def create_app(test_config=None):
     Create an endpoint to handle GET requests
     for all available categories.
     """
+    @app.route('/categories', methods=['GET'])
+    def get_categories():
+        try:
+            categories = Category.query.all()
+            categories_dict = {
+                category.id: category.type for category in categories
+            }
+
+            return jsonify({
+                'success': True,
+                'categories': categories_dict
+						})
+        except Exception as e:
+            print(e)
+            return jsonify({
+                'success': False,
+                'error': 500,
+                'message': 'An error occured while fetching categories.'
+						}), 500
 
     """
     @TODO:

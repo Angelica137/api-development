@@ -28,8 +28,21 @@ class TriviaTestCase(unittest.TestCase):
 
     """
     TODO
-    Write at least one test for each test for successful operation and for expected errors.
+    Write at least one test for each test for successful operation and for
+    expected errors.
     """
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = res.get_json()
+
+        self.assertEqual(res.status_code, 200)
+        # Check the success fuled in the the response data is True
+        self.assertTrue(data['success'])
+        self.assertTrue(len(data['categories']), 6)
+        # check 'categories' key is in reponse obj
+        self.assertIn('categories', data)
+        # check categories is a dictionary
+        self.assertIsInstance(data['categories'], dict)
 
 
 # Make the tests conveniently executable
