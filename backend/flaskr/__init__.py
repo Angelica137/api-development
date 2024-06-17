@@ -88,13 +88,13 @@ def create_app(test_config=None):
         try:
             formatted_questiosn = [
                 question.format() for question in questions.items
-                                ]
+            ]
 
             return jsonify({
                 'success': True,
                 'questions': formatted_questiosn,
                 'total_questions': questions.total
-                })
+            })
         except Exception as e:
             print(e)
             return jsonify({
