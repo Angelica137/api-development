@@ -31,6 +31,7 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for
     expected errors. - DONE
     """
+
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = res.get_json()
