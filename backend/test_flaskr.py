@@ -14,35 +14,24 @@ class TriviaTestCase(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
         self.database_name = "trivia_test"
-        self.database_path = "postgresql://{}/{}".format(
-            'localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}/{}".format('localhost:5432', self.database_name)
 
-        # Verify test_db connection
-        try:
-            conn = psycopg2.connect(self.database_path)
-            conn.close()
-            print("Database connection successful!")
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(f"Database connection failed: {error}")
-            self.fail("Database connection failed")
-
-        self.app = create_app({
-            "SQLALCHEMY_DATABASE_URI": self.database_path
-        })
-
+        self.app = create_app({"SQLALCHEMY_DATABASE_URI": self.database_path})
         self.client = self.app.test_client
 
-        # Bind the app to the current context to allow delete object
-        with self.app.app_context():
-            self.db = SQLAlchemy()
-            self.db.init_app(self.app)
-            self.db.create_all()
+        # Push an application context
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+
+        self.db = SQLAlchemy()
+        self.db.init_app(self.app)
+        self.db.create_all()
 
     def tearDown(self):
         """Executed after each test"""
-        with self.app.app_context():
-            self.db.session.remove()
-            self.db.drop_all()
+        self.db.session.remove()
+        self.db.drop_all()
+        self.app_context.pop()
 
     def test_get_categories(self):
         res = self.client().get('/categories')
@@ -129,7 +118,7 @@ class TriviaTestCase(unittest.TestCase):
         question1 = Question(
             question='What is the capital of France?',
             answer='Paris',
-            difficutly=2,
+            difficulty=2,
             category=3)
         question2 = Question(
             question='What is the largest planet in our solar system?',
