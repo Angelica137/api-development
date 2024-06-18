@@ -125,6 +125,59 @@ class TriviaTestCase(unittest.TestCase):
             new_question['difficulty'])
         self.assertEqual(created_question.category, new_question['category'])
 
+    def test_search_questions(self):
+        question1 = Question(
+            question='What is the capital of France?',
+            answer='Paris',
+            difficutly=2,
+            category=3)
+        question2 = Question(
+            question='What is the largest planet in our solar system?',
+            answer='Jupiter',
+            difficulty=3,
+            category=2)
+        question3 = Question(
+            question='Who painted the Mona Lisa?',
+            answer='Leonardo da Vinci',
+            difficulty=2,
+            category=2)
+
+        self.db.session.add_all([question1, question2, question3])
+        self.db.session.commit()
+
+        search_term = {'searchTerm': 'France'}
+        res = self.client().post('/questions/search', json=search_term)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertGreater(len(data['questions']), 0)
+        self.assertIsInstance(data['total_questions'], int)
+        self.assertGreater(data['total_questions'], 0)
+
+        search_term = {'searchTerm': 'Nonexistent'}
+        res = self.client().post('/questions/search', json=search_term)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(len(data['questions']), 0)
+        self.assertIsInstance(data['total_questions'], int)
+        self.assertEqual(data['total_questions'], 0)
+
+        search_term = {'searchTerm': ''}
+        res = self.client().post('/questions/search', json=search_term)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertGreater(len(data['questions']), 0)
+        self.assertIsInstance(data['total_questions'], int)
+        self.assertGreater(data['total_questions'], 0)
+
 
 if __name__ == "__main__":
     unittest.main()
