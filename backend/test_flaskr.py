@@ -1,4 +1,5 @@
 import os
+import psycopg2
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +15,15 @@ class TriviaTestCase(unittest.TestCase):
         self.database_name = "trivia_test"
         self.database_path = "postgresql://{}/{}".format(
             'localhost:5432', self.database_name)
+
+        # Verify test_db connection
+        try:
+            conn = psycopg2.connect(self.database_path)
+            conn.close()
+            print("Database connection successful!")
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(f"Database connection failed: {error}")
+            self.fail("Database connection failed")
 
         self.app = create_app({
             "SQLALCHEMY_DATABASE_URI": self.database_path
@@ -95,21 +105,20 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().post(
             '/questions/create',
             data=json.dumps(new_question),
-            content_type='applicaiton/json')
-        data = json.loads(res.data)
+            content_type='application/json')
+        data = json.loads(res.data.decode('utf-8').strip())
 
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         self.assertTrue(data['success'])
         self.assertIsNotNone(data['created'])
         self.assertEqual(data['created'], new_question['question'])
 
-        created_question = Question.query.filter_by(
-            question=new_question['question']
-            ).one_or_none()
+        created_question_id = data['question_id']
+        created_question = Question.query.get(created_question_id)
         self.assertIsNotNone(created_question)
 
         self.assertEqual(created_question.question, new_question['question'])
-        self.assertEqual(created_question.asnwer, new_question['answer'])
+        self.assertEqual(created_question.answer, new_question['answer'])
         self.assertEqual(created_question.difficulty, new_question['difficulty'])
         self.assertEqual(created_question.category, new_question['category'])
 

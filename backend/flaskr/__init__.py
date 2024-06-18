@@ -169,22 +169,42 @@ def create_app(test_config=None):
 
     @app.route('/questions/create', methods=['POST'])
     def create_question_submission():
-        form = FormView.question(request.form)
-        if form.validate_on_submit():
-            try:
-                new_question = Question(
-                    question=question,
-                    answer=answer,
-                    difficulty=difficulty,
-                    category=category,
+        try:
+            data = request.get_json()
+
+            if not data:
+                abort(400, 'Request body cannot be empty')
+
+            question = data.get('question', None)
+            answer = data.get('answer', None)
+            difficulty = data.get('difficulty', None)
+            category = data.get('category', None)
+
+            if not all([question, answer, difficulty, category]):
+                abort(422, 'Request data is incomplete')
+
+            new_question = Question(
+                question=question,
+                answer=answer,
+                difficulty=difficulty,
+                category=category,
                 )
-                db.session.add(new_question)
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                print(f'Error: {e}')
-            finally: db.session.close()
-        pass
+
+            db.session.add(new_question)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'created': new_question.question,
+                'question_id': new_question.id
+                }), 201
+
+        except Exception as e:
+            db.session.rollback()
+            print(f'error: {e}')
+            abort(500, 'An error occured while creating the question.')
+        finally:
+            db.session.close()
 
 
     """
