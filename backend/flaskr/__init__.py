@@ -165,7 +165,7 @@ def create_app(test_config=None):
     TEST: When you submit a question on the "Add" tab,
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
-    
+    """
 
     @app.route('/questions/create', methods=['POST'])
     def create_question_submission():
@@ -185,7 +185,7 @@ def create_app(test_config=None):
                 print(f'Error: {e}')
             finally: db.session.close()
         pass
-        """
+
 
     """
     @TODO:

@@ -84,6 +84,35 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get(f'/questions/{question.id}')
         self.assertEqual(res.status_code, 404)
 
+    def test_create_question(self):
+        new_question = {
+            'question': 'What is the capital of France?',
+            'answer': 'Paris',
+            'difficulty': 2,
+            'category': 3,
+        }
+
+        res = self.client().post(
+            '/questions/create',
+            data=json.dumps(new_question),
+            content_type='applicaiton/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIsNotNone(data['created'])
+        self.assertEqual(data['created'], new_question['question'])
+
+        created_question = Question.query.filter_by(
+            question=new_question['question']
+            ).one_or_none()
+        self.assertIsNotNone(created_question)
+
+        self.assertEqual(created_question.question, new_question['question'])
+        self.assertEqual(created_question.asnwer, new_question['answer'])
+        self.assertEqual(created_question.difficulty, new_question['difficulty'])
+        self.assertEqual(created_question.category, new_question['category'])
+
 
 if __name__ == "__main__":
     unittest.main()
