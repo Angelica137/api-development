@@ -1,10 +1,11 @@
 import os
+import logging
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -13,6 +14,7 @@ def create_app(test_config=None):
     # create and configure the app
     print("Creating Falsk app...")
     app = Flask(__name__)
+    logging.basicConfig(level=logging.DEBUG)
 
     if test_config is None:
         setup_db(app)
@@ -40,9 +42,12 @@ def create_app(test_config=None):
             "GET,PUT,POST,DELETE,OPTIONS")
         return response
 
-    @app.route('/test')
-    def test_route():
-        return jsonify(message='Flask app is running!')
+    @app.route('/')
+    def index():
+        urls = {}
+        for rule in app.url_map.iter_rules():
+            urls[rule.rule] = list(rule.methods)
+        return jsonify(urls)
 
     """
     @TODO:
@@ -112,6 +117,45 @@ def create_app(test_config=None):
     This removal will persist in the database and when you refresh the page.
     """
 
+    @app.route('/questions/<int:question_id>', methods=['GET', 'DELETE'])
+    def delete_question(question_id):
+        if request.method == 'GET':
+            question = Question.query.get(question_id)
+            if not question:
+                return jsonify({
+                    'success': False,
+                    'error': 404,
+                    'message': 'Question not found'
+                }), 404
+
+        elif request.method == 'DELETE':
+            try:
+                question = Question.query.get(question_id)
+                if not question:
+                    return jsonify({
+                        'success': False,
+                        'error': 404,
+                        'message': 'Question not found'
+                    }), 404
+
+                db.session.delete(question)
+                db.session.commit()
+
+                return jsonify({
+                    'success': True,
+                    'deleted': question_id
+                }), 200
+            except Exception as e:
+                db.session.rollback()
+                print(e)
+                return jsonify({
+                    'success': False,
+                    'error': 500,
+                    'message': 'An error occurred while deleting the question.'
+                }), 500
+            finally:
+                db.session.close()
+
     """
     @TODO:
     Create an endpoint to POST a new question,
@@ -121,7 +165,27 @@ def create_app(test_config=None):
     TEST: When you submit a question on the "Add" tab,
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
-    """
+    
+
+    @app.route('/questions/create', methods=['POST'])
+    def create_question_submission():
+        form = FormView.question(request.form)
+        if form.validate_on_submit():
+            try:
+                new_question = Question(
+                    question=question,
+                    answer=answer,
+                    difficulty=difficulty,
+                    category=category,
+                )
+                db.session.add(new_question)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f'Error: {e}')
+            finally: db.session.close()
+        pass
+        """
 
     """
     @TODO:
@@ -160,6 +224,9 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     """
+
+    for rule in app.url_map.iter_rules():
+        print(rule)
 
     print("Flask app created successfully")
     return app
