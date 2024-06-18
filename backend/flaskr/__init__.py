@@ -225,7 +225,7 @@ def create_app(test_config=None):
 
             questions = Question.query.filter(
                 Question.question.ilike(f'%{search_term}%')
-                ).all()
+            ).all()
             formatted_questions = [question.format() for question in questions]
 
             return jsonify({
