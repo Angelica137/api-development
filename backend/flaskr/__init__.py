@@ -188,7 +188,7 @@ def create_app(test_config=None):
                 answer=answer,
                 difficulty=difficulty,
                 category=category,
-                )
+            )
 
             db.session.add(new_question)
             db.session.commit()
@@ -197,7 +197,7 @@ def create_app(test_config=None):
                 'success': True,
                 'created': new_question.question,
                 'question_id': new_question.id
-                }), 201
+            }), 201
 
         except Exception as e:
             db.session.rollback()
@@ -205,7 +205,6 @@ def create_app(test_config=None):
             abort(500, 'An error occured while creating the question.')
         finally:
             db.session.close()
-
 
     """
     @TODO:
