@@ -188,7 +188,9 @@ class TriviaTestCase(unittest.TestCase):
         self.db.session.commit()
 
         res = self.client().get(f'/categories/{category1.id}/questions')
-        data = json.loads(res.data)
+        print(f"Response data: {res.data}")  # Print the res data
+        print(f"Status code: {res.status_code}")  # Print the status code
+        data = json.loads(res.get_data(as_text=True))  # Parse response data as text
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
@@ -198,11 +200,75 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], category1.type)
 
         res = self.client().get('/categories/999/questions')
-        data = json.loads(res.data)
+        data = json.loads(res.get_data(as_text=True))  # Parse response data as text
 
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Category not found')
+
+    def test_play_quiz(self):
+        category1 = Category(type='Science')
+        category2 = Category(type='History')
+        self.db.session.add_all([category1, category2])
+        self.db.session.commit()
+
+        question1 = Question(
+          question='What is the capital of France?',
+          answer='Paris',
+          category=category1.id,
+          difficulty=2)
+        question2 = Question(
+          question='Who painted the Mona Lisa?',
+          answer='Leonardo da Vinci',
+          category=category2.id,
+          difficulty=3)
+        question3 = Question(
+          question='What is the largest planet in our solar system?',
+          answer='Jupiter',
+          category=category1.id,
+          difficulty=3)
+        self.db.session.add_all([question1, question2, question3])
+        self.db.session.commit()
+
+        # Test case 1: Play quiz with a specific category
+        data = {
+            'quiz_category': {'type': 'Science', 'id': category1.id},
+            'previous_questions': []
+        }
+        res = self.client().post('/quizzes', json=data)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(data['question'])
+        self.assertIn(data['question']['id'], [question1.id, question3.id])
+
+        # Test case 2: Play quiz with 'All' categories
+        data = {
+            'quiz_category': {'type': 'All', 'id': 0},
+            'previous_questions': []
+        }
+        res = self.client().post('/quizzes', json=data)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(data['question'])
+        self.assertIn(data['question']['id'],
+                      [question1.id, question2.id, question3.id])
+
+        # Test case 3: Play quiz with a previous question
+        data = {
+            'quiz_category': {'type': 'Science', 'id': category1.id},
+            'previous_questions': [question1.id]
+        }
+        res = self.client().post('/quizzes', json=data)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(data['question'])
+        self.assertEqual(data['question']['id'], question3.id)
 
 
 if __name__ == "__main__":
