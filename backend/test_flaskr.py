@@ -190,7 +190,8 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get(f'/categories/{category1.id}/questions')
         print(f"Response data: {res.data}")  # Print the res data
         print(f"Status code: {res.status_code}")  # Print the status code
-        data = json.loads(res.get_data(as_text=True))  # Parse response data as text
+        # Parse response data as text
+        data = json.loads(res.get_data(as_text=True))
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
@@ -200,7 +201,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], category1.type)
 
         res = self.client().get('/categories/999/questions')
-        data = json.loads(res.get_data(as_text=True))  # Parse response data as text
+        # Parse response data as text
+        data = json.loads(res.get_data(as_text=True))
 
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
@@ -213,20 +215,20 @@ class TriviaTestCase(unittest.TestCase):
         self.db.session.commit()
 
         question1 = Question(
-          question='What is the capital of France?',
-          answer='Paris',
-          category=category1.id,
-          difficulty=2)
+            question='What is the capital of France?',
+            answer='Paris',
+            category=category1.id,
+            difficulty=2)
         question2 = Question(
-          question='Who painted the Mona Lisa?',
-          answer='Leonardo da Vinci',
-          category=category2.id,
-          difficulty=3)
+            question='Who painted the Mona Lisa?',
+            answer='Leonardo da Vinci',
+            category=category2.id,
+            difficulty=3)
         question3 = Question(
-          question='What is the largest planet in our solar system?',
-          answer='Jupiter',
-          category=category1.id,
-          difficulty=3)
+            question='What is the largest planet in our solar system?',
+            answer='Jupiter',
+            category=category1.id,
+            difficulty=3)
         self.db.session.add_all([question1, question2, question3])
         self.db.session.commit()
 

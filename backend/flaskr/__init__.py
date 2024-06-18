@@ -253,7 +253,8 @@ def create_app(test_config=None):
         if not category:
             abort(404, 'Category not found')
 
-        questions = Question.query.filter(Question.category == category_id).all()
+        questions = Question.query.filter(
+            Question.category == category_id).all()
         formatted_questions = [question.format() for question in questions]
 
         return jsonify({
@@ -284,7 +285,7 @@ def create_app(test_config=None):
             if quiz_category['type'] == 'All':
                 questions = Question.query.filter(
                     Question.id.notin_(previous_questions)
-                    ).all()
+                ).all()
             else:
                 questions = Question.query.filter(
                     Question.category == quiz_category['id'],
