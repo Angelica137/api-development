@@ -272,6 +272,30 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['question'])
         self.assertEqual(data['question']['id'], question3.id)
 
+    def test_404_error(self):
+        # Test case 1: Request a non-existent resource
+        res = self.client().get('/non-existent-resource')
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 404)
+        self.assertEqual(data['message'], 'Not Found')
+
+    def test_422_error(self):
+        # Test case 2: Send an invalid request
+        data = {
+            'quiz_category': {'type': 'Invalid', 'id': 999},
+            'previous_questions': []
+        }
+        res = self.client().post('/quizzes', json=data)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 422)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 422)
+        self.assertEqual(data['message'], 'Unprocessable Entity')
+
 
 if __name__ == "__main__":
     unittest.main()
