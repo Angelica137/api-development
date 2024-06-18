@@ -168,6 +168,42 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIsInstance(data['total_questions'], int)
         self.assertGreater(data['total_questions'], 0)
 
+    def test_get_questions_by_category(self):
+        category1 = Category(type='Science')
+        category2 = Category(type='History')
+        self.db.session.add_all([category1, category2])
+        self.db.session.commit()
+
+        question1 = Question(
+            question='What is the capital of France?',
+            answer='Paris',
+            category=category1.id,
+            difficulty=2)
+        question2 = Question(
+            question='Who painted the Mona Lisa?',
+            answer='Leonardo da Vinci',
+            category=category2.id,
+            difficulty=3)
+        self.db.session.add_all([question1, question2])
+        self.db.session.commit()
+
+        res = self.client().get(f'/categories/{category1.id}/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(len(data['questions']), 1)
+        self.assertEqual(data['total_questions'], 1)
+        self.assertEqual(data['current_category'], category1.type)
+
+        res = self.client().get('/categories/999/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['message'], 'Category not found')
+
 
 if __name__ == "__main__":
     unittest.main()
