@@ -92,8 +92,10 @@ def create_app(test_config=None):
         questions = Question.query.paginate(page, per_page=10, error_out=False)
 
         try:
-            formatted_questions = [question.format() for question in questions.items]
-            categories = {category.id: category.type for category in Category.query.all()}
+            formatted_questions = [question.format()
+                                   for question in questions.items]
+            categories = {
+                category.id: category.type for category in Category.query.all()}
 
             return jsonify({
                 'success': True,
