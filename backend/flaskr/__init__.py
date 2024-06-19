@@ -92,21 +92,21 @@ def create_app(test_config=None):
         questions = Question.query.paginate(page, per_page=10, error_out=False)
 
         try:
-            formatted_questiosn = [
-                question.format() for question in questions.items
-            ]
+            formatted_questions = [question.format() for question in questions.items]
+            categories = {category.id: category.type for category in Category.query.all()}
 
             return jsonify({
                 'success': True,
-                'questions': formatted_questiosn,
-                'total_questions': questions.total
+                'questions': formatted_questions,
+                'total_questions': questions.total,
+                'categories': categories
             })
         except Exception as e:
             print(e)
             return jsonify({
                 'success': False,
                 'error': 500,
-                'message': 'An error occured while fetchin the questions'
+                'message': 'An error occurred while fetching the questions'
             }), 500
 
     """
