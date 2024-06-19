@@ -86,28 +86,67 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for
     three pages. Clicking on the page numbers should update the questions.
     """
-    @app.route('/questions', methods=['GET'])
-    def get_questions():
-        page = request.args.get('page', 1, type=int)
-        questions = Question.query.paginate(page, per_page=10, error_out=False)
+    @app.route('/questions', methods=['GET', 'POST'])
+    def questions():
+        if request.method == 'GET':
+            page = request.args.get('page', 1, type=int)
+            questions = Question.query.paginate(page, per_page=10, error_out=False)
 
-        try:
-            formatted_questions = [question.format() for question in questions.items]
-            categories = {category.id: category.type for category in Category.query.all()}
+            try:
+                formatted_questions = [question.format() for question in questions.items]
+                categories = {category.id: category.type for category in Category.query.all()}
 
-            return jsonify({
-                'success': True,
-                'questions': formatted_questions,
-                'total_questions': questions.total,
-                'categories': categories
-            })
-        except Exception as e:
-            print(e)
-            return jsonify({
-                'success': False,
-                'error': 500,
-                'message': 'An error occurred while fetching the questions'
-            }), 500
+                return jsonify({
+                    'success': True,
+                    'questions': formatted_questions,
+                    'total_questions': questions.total,
+                    'categories': categories
+                })
+            except Exception as e:
+                print(e)
+                return jsonify({
+                    'success': False,
+                    'error': 500,
+                    'message': 'An error occurred while fetching the questions'
+                }), 500
+
+        elif request.method == 'POST':
+            try:
+                data = request.get_json()
+
+                if not data:
+                    abort(400, 'Request body cannot be empty')
+
+                question = data.get('question', None)
+                answer = data.get('answer', None)
+                difficulty = data.get('difficulty', None)
+                category = data.get('category', None)
+
+                if not all([question, answer, difficulty, category]):
+                    abort(422, 'Request data is incomplete')
+
+                new_question = Question(
+                    question=question,
+                    answer=answer,
+                    difficulty=difficulty,
+                    category=category,
+                )
+
+                db.session.add(new_question)
+                db.session.commit()
+
+                return jsonify({
+                    'success': True,
+                    'created': new_question.question,
+                    'question_id': new_question.id
+                }), 201
+
+            except Exception as e:
+                db.session.rollback()
+                print(f'error: {e}')
+                abort(500, 'An error occurred while creating the question.')
+            finally:
+                db.session.close()
 
     """
     @TODO:
@@ -164,48 +203,11 @@ def create_app(test_config=None):
     category, and difficulty score.
 
     TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will appear at the end of the last page
-    of the questions list in the "List" tab.
+    the form will clear and the question will appear at the end of the last
+    page of the questions list in the "List" tab.
+
+    This was added to /questions
     """
-
-    @app.route('/questions/create', methods=['POST'])
-    def create_question_submission():
-        try:
-            data = request.get_json()
-
-            if not data:
-                abort(400, 'Request body cannot be empty')
-
-            question = data.get('question', None)
-            answer = data.get('answer', None)
-            difficulty = data.get('difficulty', None)
-            category = data.get('category', None)
-
-            if not all([question, answer, difficulty, category]):
-                abort(422, 'Request data is incomplete')
-
-            new_question = Question(
-                question=question,
-                answer=answer,
-                difficulty=difficulty,
-                category=category,
-            )
-
-            db.session.add(new_question)
-            db.session.commit()
-
-            return jsonify({
-                'success': True,
-                'created': new_question.question,
-                'question_id': new_question.id
-            }), 201
-
-        except Exception as e:
-            db.session.rollback()
-            print(f'error: {e}')
-            abort(500, 'An error occured while creating the question.')
-        finally:
-            db.session.close()
 
     """
     @TODO:
