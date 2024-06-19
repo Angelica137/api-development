@@ -46,7 +46,7 @@ npm install
 From the root directory, start the backend server:
 
 ```bash
-export FLASK_APP=app.py
+export FLASK_APP=backend/flaskr/__init__.py
 export FLASK_ENV=development
 flask run
 ```
