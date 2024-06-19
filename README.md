@@ -1,52 +1,255 @@
-# API Development and Documentation Final Project
+# Trivia App
 
-# This is a test
+This project is a full-stack web application for the API Development and Documentation modeule of the Full Stack Nanodegree from Udacity.
 
-## Trivia App
+The backend is built with Flask and SQLAlchemy, and the frontend is built with React. The application allows users to view questions, add new questions, search for questions, play a quiz game, and delete questions.
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out.
+## Getting Started
+### Prerequisites
 
-That's where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+- Python 3.7 or later
+- Node.js and npm (for frontend development)
 
-1. Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer.
-2. Delete questions.
-3. Add questions and require that they include question and answer text.
-4. Search for questions based on a text query string.
-5. Play the quiz game, randomizing either all questions or within a specific category.
+### Installing Dependencies
+#### Backend Dependencies
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others.
+- Create a new virtual environment:
 
-## Starting and Submitting the Project
+```bash
+Python -m venv env
+source env/bin/activate  # on Windows, use `env\Scripts\activate`
+```
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the project repository and [clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom.
+- Install the required packages:
 
-## About the Stack
+```bash
+pip install -r requirements.txt
+```
 
-We started the full stack application for you. It is designed with some key functional areas:
+#### Frontend Dependencies
 
-### Backend
+- Navigate to the frontend directory:
 
-The [backend](./backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+```bash
+cd frontend
+```
 
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
+- Install the required packages:
 
-> View the [Backend README](./backend/README.md) for more details.
+```bash
+npm install
+```
 
-### Frontend
+### Starting the Server
+#### Backend Server
 
-The [frontend](./frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+From the root directory, start the backend server:
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads?
+```bash
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run
+```
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+The backend server will start running on http://localhost:5000/ by default.
 
-1. `frontend/src/components/QuestionView.js`
-2. `frontend/src/components/FormView.js`
-3. `frontend/src/components/QuizView.js`
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
+#### Frontend Server
 
-> View the [Frontend README](./frontend/README.md) for more details.
-# api-development
+Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Start the frontend server:
+
+```bash
+npm start
+```
+
+The frontend server will start running on http://localhost:3000/ by default.
+
+
+## API Endpoints
+
+### GET /categories
+
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category.
+- Request Arguments: None
+- Returns: An object with a single key, categories, that contains a object of id: category_string key-value pairs.
+
+```json
+{
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  }
+}
+```
+
+### GET /questions
+
+- Fetches a list of questions, including pagination (every 10 questions).
+- Request Arguments: page (optional, default is 1)
+- Returns: An object with the following keys:
+  -  success: Boolean indicating if the request was successful
+  - questions: A list of question objects
+  - total_questions: The total number of questions
+  - categories: An object of id: category_string key-value pairs
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    },
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    }
+  ],
+  "total_questions": 20,
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  }
+}
+```
+
+### DELETE /questions/<int:question_id>
+
+- Deletes a question based on the provided question ID.
+- Request Arguments: question_id (required)
+- Returns: An object with the following keys:
+  - success: Boolean indicating if the request was successful
+  - deleted: The ID of the deleted question
+
+```json
+{
+  "success": true,
+  "deleted": 10
+}
+```
+
+### POST /questions
+
+- Creates a new question.
+- Request Body:
+  - question: String (required)
+  - answer: String (required)
+  - difficulty: Integer (required)
+  - category: Integer (required)
+- Returns: An object with the following keys:
+  - success: Boolean indicating if the request was successful
+  - created: The question text of the created question
+  - question_id: The ID of the created question
+
+```json
+{
+  "success": true,
+  "created": "What is the capital of France?",
+  "question_id": 25
+}
+```
+
+### POST /questions/search
+
+- Searches for questions based on a search term.
+- Request Body:
+  - searchTerm: String (required)
+- Returns: An object with the following keys:
+  - success: Boolean indicating if the request was successful
+  - questions: A list of question objects that match the search term
+  - total_questions: The total number of questions that match the search term
+  - current_category: The category of the questions (if applicable)
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    }
+  ],
+  "total_questions": 1,
+  "current_category": null
+}
+```
+
+### GET /categories/<int:category_id>/questions
+
+- Fetches questions for a specific category.
+- Request Arguments: category_id (required)
+- Returns: An object with the following keys:
+  - success: Boolean indicating if the request was successful
+  - questions: A list of question objects for the specified category
+  - total_questions: The total number of questions for the specified category
+  - current_category: The name of the current category
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    },
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    }
+  ],
+  "total_questions": 2,
+  "current_category": "History"
+}
+```
+
+### POST /quizzes
+- Fetches a random question for the quiz game, excluding previously displayed questions.
+- Request Body:
+  - quiz_category: An object with the following keys:
+    - type: String (required, either a category type or 'All')
+    - id: Integer (required, the category ID, or 0 for 'All')
+  - previous_questions: A list of question IDs (required)
+- Returns: An object with the following keys:
+  - success: Boolean indicating if the request was successful
+  - question: A random question object (if available)
+
+```json
+{
+  "success": true,
+  "question": {
+    "answer": "Maya Angelou",
+    "category": 4,
+    "difficulty": 2,
+    "id": 5,
+    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+  }
+}
