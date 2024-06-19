@@ -189,6 +189,5 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Not Found')
 
 
-
 if __name__ == "__main__":
     unittest.main()
