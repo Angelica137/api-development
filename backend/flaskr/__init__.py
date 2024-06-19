@@ -332,10 +332,6 @@ def create_app(test_config=None):
             'message': 'Unprocessable Entity'
         }), 422
 
-    for rule in app.url_map.iter_rules():
-        print(rule)
-
-    print("Flask app created successfully")
     return app
 
 
