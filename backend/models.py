@@ -4,8 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 import json
 from flask_migrate import Migrate
 
-database_name = 'trivia'
-database_path = 'postgresql://{}/{}'.format('localhost:5432', database_name)
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+database_name = os.environ.get('DATABASE_NAME', 'trivia')
+database_host = os.environ.get('DATABASE_HOST', 'localhost:5432')
+database_path = f'postgresql://{database_host}/{database_name}'
 
 db = SQLAlchemy()
 migrate = Migrate()
