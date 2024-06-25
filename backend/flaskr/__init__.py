@@ -104,7 +104,8 @@ def create_app(test_config=None):
                     'success': True,
                     'questions': formatted_questions,
                     'total_questions': questions.total,
-                    'categories': categories
+                    'categories': categories,
+                    'current_category': None
                 })
             except Exception as e:
                 print(e)
@@ -276,7 +277,7 @@ def create_app(test_config=None):
             'success': True,
             'questions': formatted_questions,
             'total_questions': len(questions),
-            'current_category': category.type
+            'current_category': category_id
         }), 200
 
     """
@@ -297,17 +298,24 @@ def create_app(test_config=None):
             quiz_category = data.get('quiz_category')
             previous_questions = data.get('previous_questions', [])
 
-            if quiz_category['type'] == 'All':
-                questions = Question.query.filter(
-                    Question.id.notin_(previous_questions)
-                ).all()
-            else:
-                questions = Question.query.filter(
-                    Question.category == quiz_category['id'],
-                    Question.id.notin_(previous_questions)
-                ).all()
+            # Debug logging
+            print(f"Received data: {data}")
+            print(f"Quiz category: {quiz_category}")
+            print(f"Previous questions: {previous_questions}")
 
-            if len(questions) > 0:
+            # Base query
+            query = Question.query.filter(Question.id.notin_(previous_questions))
+
+                    # If a specific category is selected (not "All")
+            if quiz_category and quiz_category.get('id') != 0:
+                query = query.filter(Question.category == quiz_category['id'])
+
+            # Get all available questions
+            questions = query.all()
+
+            print(f"Number of questions found: {len(questions)}")  # Debug print
+
+            if questions:
                 question = random.choice(questions).format()
             else:
                 question = None
@@ -318,7 +326,7 @@ def create_app(test_config=None):
             }), 200
 
         except Exception as e:
-            print(f'Error: {e}')
+            print(f'Error in play_quiz: {e}')
             abort(422)
 
     """

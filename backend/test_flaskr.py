@@ -264,21 +264,38 @@ class TriviaTestCase(unittest.TestCase):
             self.client().post('/questions', json=q)
 
         # Test quiz with all categories
-        quiz_data = {
-            'previous_questions': [],
-            'quiz_category': {'type': 'All', 'id': 0}
-        }
+        previous_questions = []
+        categories_seen = set()
 
-        res = self.client().post('/quizzes', json=quiz_data)
-        data = json.loads(res.data)
+        for _ in range(5):  # Test multiple questions
+            quiz_data = {
+                'previous_questions': previous_questions,
+                'quiz_category': {'type': 'click', 'id': 0}  # 'click' is often used to represent 'All'
+            }
 
-        self.assertEqual(res.status_code, 200)
-        self.assertTrue(data['success'])
-        self.assertIsNotNone(data['question'])
+            res = self.client().post('/quizzes', json=quiz_data)
+            data = json.loads(res.data)
 
-        self.assertIsInstance(data['question'], dict)
-        self.assertIn('question', data['question'])
-        self.assertIn('answer', data['question'])
+            self.assertEqual(res.status_code, 200)
+            self.assertTrue(data['success'])
+            self.assertIsNotNone(data['question'])
+
+            question = data['question']
+            self.assertIsInstance(question, dict)
+            self.assertIn('question', question)
+            self.assertIn('answer', question)
+            self.assertIn('category', question)
+            self.assertIn('id', question)
+
+            # Ensure we're not getting repeat questions
+            self.assertNotIn(question['id'], previous_questions)
+            previous_questions.append(question['id'])
+
+            # Track categories to ensure we're getting questions from different categories
+            categories_seen.add(question['category'])
+
+        # After multiple questions, we should have seen more than one category
+        self.assertGreater(len(categories_seen), 1, "Questions were not from multiple categories")
 
     def test_404_error(self):
         # Test case 1: Request a non-existent resource
