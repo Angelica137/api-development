@@ -1,3 +1,4 @@
+from werkzeug.exceptions import HTTPException, BadRequest
 import os
 import logging
 from flask import Flask, request, abort, jsonify
@@ -145,10 +146,14 @@ def create_app(test_config=None):
                     'question_id': new_question.id
                 }), 201
 
+            except BadRequest:
+                abort(400, description='Request body cannot be empty')
             except Exception as e:
                 db.session.rollback()
                 print(f'error: {e}')
-                abort(500, 'An error occurred while creating the question.')
+                if isinstance(e, HTTPException):
+                    abort(e.code, description=str(e))
+                abort(500, description='An error occurred while creating the question.')
             finally:
                 db.session.close()
 
@@ -332,6 +337,22 @@ def create_app(test_config=None):
             'error': 422,
             'message': 'Unprocessable Entity'
         }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": str(error.description)
+        }), 400
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": str(error.description)
+        }), 500
 
     return app
 
