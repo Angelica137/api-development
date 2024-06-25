@@ -275,8 +275,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
         self.assertIsNotNone(data['question'])
-        # Instead of checking if the question is in our list, just check if
-        # it's a dict with the right keys
+
         self.assertIsInstance(data['question'], dict)
         self.assertIn('question', data['question'])
         self.assertIn('answer', data['question'])
