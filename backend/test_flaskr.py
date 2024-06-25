@@ -67,6 +67,63 @@ class TriviaTestCase(unittest.TestCase):
             self.assertIsInstance(question['difficulty'], int)
             self.assertIsInstance(question['category'], int)
 
+    def test_create_new_question(self):
+        """Test POST: /questions"""
+        new_question = {
+          'question': 'What is the capital of Autralia?',
+          'answer': 'Canberra',
+          'difficulty': 3,
+          'category': 3
+        }
+
+        res = self.client().post('/questions', json=new_question)
+
+        # Print the raw response data
+        print("Raw response data:", res.data)
+        print("Response status code:", res.status_code)
+        
+        decoded_data = res.data.decode('utf-8').strip()
+        print("Decoded data:", decoded_data)
+
+        try:
+            data = json.loads(res.data)
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+            print(f"Response data type: {type(res.data)}")
+            print(f"Response data content: {res.data}")
+            self.fail("Failed to decode JSON response")
+
+        self.assertEqual(res.status_code, 201)
+        self.assertTrue(data['success'])
+        self.assertIsNotNone(data['created'])
+        self.assertIsNotNone(data['question_id'])
+
+        # check question was added to db
+        created_question = Question.query.get(data['question_id'])
+        self.assertIsNotNone(created_question)
+        self.assertEqual(created_question.question, new_question['question'])
+        self.assertEqual(created_question.answer, new_question['answer'])
+        self.assertEqual(created_question.difficulty, new_question['difficulty'])
+        self.assertEqual(created_question.category, new_question['category'])
+
+        # test missing data
+        incomplete_question = {
+            'question': 'Incomplete question',
+            'answer': 'Incomplete answer'
+        }
+
+        res = self.client().post('/questions', json=incomplete_question)
+        print("Incomplete question response status:", res.status_code)
+        print("Incomplete question raw response data:", res.data)
+
+        try:
+            data = json.loads(res.data)
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error for incomplete question: {e}")
+            print(f"Incomplete question response data type: {type(res.data)}")
+            print(f"Incomplete question response data content: {res.data}")
+            self.fail("Failed to decode JSON response for incomplete question")
+
     def test_delete_question(self):
         question = Question(
             question='What is the capital of France?',

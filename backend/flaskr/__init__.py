@@ -123,7 +123,11 @@ def create_app(test_config=None):
                 category = data.get('category', None)
 
                 if not all([question, answer, difficulty, category]):
-                    abort(422, 'Request data is incomplete')
+                    return jsonify({
+                        'success': False,
+                        'error': 422,
+                        'message': 'Request data is incomplete'
+                    }), 422
 
                 new_question = Question(
                     question=question,
