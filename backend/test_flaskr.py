@@ -18,10 +18,11 @@ class TriviaTestCase(unittest.TestCase):
 
     def setUp(self):
         """Define test variables and initialize app."""
-        self.database_name = os.environ.get('TEST_DATABASE_NAME', 'trivia_test')
-        self.database_host = os.environ.get('TEST_DATABASE_HOST', 'localhost:5432')
+        self.database_name = os.environ.get(
+            'TEST_DATABASE_NAME', 'trivia_test')
+        self.database_host = os.environ.get(
+            'TEST_DATABASE_HOST', 'localhost:5432')
         self.database_path = f'postgresql://{self.database_host}/{self.database_name}'
-
 
         self.app = create_app({"SQLALCHEMY_DATABASE_URI": self.database_path})
         self.client = self.app.test_client
@@ -245,12 +246,20 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_play_quiz(self):
         # Create some test questions
-        questions = [
-            {'question': 'What is the capital of France?', 'answer': 'Paris', 'difficulty': 2, 'category': 3},
-            {'question': 'Who wrote Hamlet?', 'answer': 'William Shakespeare', 'difficulty': 3, 'category': 4},
-            {'question': 'What is the chemical symbol for gold?', 'answer': 'Au', 'difficulty': 2, 'category': 1},
-        ]
-    
+        questions = [{'question': 'What is the capital of France?',
+                      'answer': 'Paris',
+                      'difficulty': 2,
+                      'category': 3},
+                     {'question': 'Who wrote Hamlet?',
+                      'answer': 'William Shakespeare',
+                      'difficulty': 3,
+                      'category': 4},
+                     {'question': 'What is the chemical symbol for gold?',
+                      'answer': 'Au',
+                      'difficulty': 2,
+                      'category': 1},
+                     ]
+
         for q in questions:
             self.client().post('/questions', json=q)
 
@@ -259,14 +268,15 @@ class TriviaTestCase(unittest.TestCase):
             'previous_questions': [],
             'quiz_category': {'type': 'All', 'id': 0}
         }
-    
+
         res = self.client().post('/quizzes', json=quiz_data)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data['success'])
         self.assertIsNotNone(data['question'])
-        # Instead of checking if the question is in our list, just check if it's a dict with the right keys
+        # Instead of checking if the question is in our list, just check if
+        # it's a dict with the right keys
         self.assertIsInstance(data['question'], dict)
         self.assertIn('question', data['question'])
         self.assertIn('answer', data['question'])

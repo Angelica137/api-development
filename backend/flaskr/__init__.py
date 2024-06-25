@@ -91,11 +91,14 @@ def create_app(test_config=None):
     def questions():
         if request.method == 'GET':
             page = request.args.get('page', 1, type=int)
-            questions = Question.query.paginate(page=page, per_page=10, error_out=False)
+            questions = Question.query.paginate(
+                page=page, per_page=10, error_out=False)
 
             try:
-                formatted_questions = [question.format() for question in questions.items]
-                categories = {category.id: category.type for category in Category.query.all()}
+                formatted_questions = [question.format()
+                                       for question in questions.items]
+                categories = {
+                    category.id: category.type for category in Category.query.all()}
 
                 return jsonify({
                     'success': True,
@@ -153,7 +156,8 @@ def create_app(test_config=None):
                 print(f'error: {e}')
                 if isinstance(e, HTTPException):
                     abort(e.code, description=str(e))
-                abort(500, description='An error occurred while creating the question.')
+                abort(
+                    500, description='An error occurred while creating the question.')
             finally:
                 db.session.close()
 
