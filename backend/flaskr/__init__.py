@@ -311,16 +311,18 @@ def create_app(test_config=None):
             print(f"Previous questions: {previous_questions}")
 
             # Base query
-            query = Question.query.filter(Question.id.notin_(previous_questions))
+            query = Question.query.filter(
+                Question.id.notin_(previous_questions))
 
-                    # If a specific category is selected (not "All")
+            # If a specific category is selected (not "All")
             if quiz_category and quiz_category.get('id') != 0:
                 query = query.filter(Question.category == quiz_category['id'])
 
             # Get all available questions
             questions = query.all()
 
-            print(f"Number of questions found: {len(questions)}")  # Debug print
+            # Debug print
+            print(f"Number of questions found: {len(questions)}")
 
             if questions:
                 question = random.choice(questions).format()

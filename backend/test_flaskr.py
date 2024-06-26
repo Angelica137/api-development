@@ -57,7 +57,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_categories_failure(self):
         original_query = Category.query
         Category.query = None
-    
+
         res = self.client().get('/categories')
         data = json.loads(res.data)
 
@@ -66,7 +66,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 500)
         self.assertFalse(data['success'])
         self.assertEqual(data['error'], 500)
-        self.assertIn('An error occured while fetching categories.', data['message'])
+        self.assertIn(
+            'An error occured while fetching categories.',
+            data['message'])
 
     # ----------------------------------------------
     # Test GET:/questions
@@ -372,7 +374,8 @@ class TriviaTestCase(unittest.TestCase):
         for _ in range(5):  # Test multiple questions
             quiz_data = {
                 'previous_questions': previous_questions,
-                'quiz_category': {'type': 'click', 'id': 0}  # 'click' is often used to represent 'All'
+                # 'click' is often used to represent 'All'
+                'quiz_category': {'type': 'click', 'id': 0}
             }
 
             res = self.client().post('/quizzes', json=quiz_data)
@@ -393,11 +396,15 @@ class TriviaTestCase(unittest.TestCase):
             self.assertNotIn(question['id'], previous_questions)
             previous_questions.append(question['id'])
 
-            # Track categories to ensure we're getting questions from different categories
+            # Track categories to ensure we're getting questions from different
+            # categories
             categories_seen.add(question['category'])
 
         # After multiple questions, we should have seen more than one category
-        self.assertGreater(len(categories_seen), 1, "Questions were not from multiple categories")
+        self.assertGreater(
+            len(categories_seen),
+            1,
+            "Questions were not from multiple categories")
 
     def test_get_quiz_failure(self):
         quiz_data = {
