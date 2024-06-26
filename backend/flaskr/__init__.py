@@ -93,6 +93,8 @@ def create_app(test_config=None):
             page = request.args.get('page', 1, type=int)
             questions = Question.query.paginate(
                 page=page, per_page=10, error_out=False)
+            if not questions.items:
+                abort(404)
 
             try:
                 formatted_questions = [question.format()
@@ -238,6 +240,8 @@ def create_app(test_config=None):
     def search_questions():
         try:
             data = request.get_json()
+            if data is None:
+                raise BadRequest("Invalis JSON")
             search_term = data.get('searchTerm', '')
 
             questions = Question.query.filter(
@@ -251,6 +255,9 @@ def create_app(test_config=None):
                 'total_questions': len(questions)
             }), 200
 
+        except BadRequest as e:
+            print(f'Bad Request Error: {e}')
+            abort(400, description=str(e))
         except Exception as e:
             print(f'Error: {e}')
             abort(500, 'An error occured while searching for quesions.')
@@ -277,7 +284,7 @@ def create_app(test_config=None):
             'success': True,
             'questions': formatted_questions,
             'total_questions': len(questions),
-            'current_category': category_id
+            'current_category': category.type
         }), 200
 
     """

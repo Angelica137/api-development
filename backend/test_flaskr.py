@@ -41,6 +41,9 @@ class TriviaTestCase(unittest.TestCase):
         self.db.drop_all()
         self.app_context.pop()
 
+    # ----------------------------------------------
+    # Test GET:/categories
+    # ----------------------------------------------
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = res.get_json()
@@ -51,6 +54,23 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIn('categories', data)
         self.assertIsInstance(data['categories'], dict)
 
+    def test_get_categories_failure(self):
+        original_query = Category.query
+        Category.query = None
+    
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        Category.query = original_query
+
+        self.assertEqual(res.status_code, 500)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 500)
+        self.assertIn('An error occured while fetching categories.', data['message'])
+
+    # ----------------------------------------------
+    # Test GET:/questions
+    # ----------------------------------------------
     def test_get_questions(self):
         res = self.client().get('/questions?page=1')
         data = res.get_json()
@@ -74,8 +94,50 @@ class TriviaTestCase(unittest.TestCase):
             self.assertIsInstance(question['difficulty'], int)
             self.assertIsInstance(question['category'], int)
 
+    def test_get_questions_failure(self):
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 404)
+        self.assertIn('Not Found', data['message'])
+
+    # ----------------------------------------------
+    # Test pagination
+    # ----------------------------------------------
+    def test_get_pagination_success(self):
+        for i in range(15):
+            question = Question(
+                question=f'Test question {i}',
+                answer=f'Test answer {i}',
+                difficulty=1,
+                category=1
+            )
+            db.session.add(question)
+        db.session.commit()
+
+        res = self.client().get('/questions?page=2')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertTrue(len(data['questions']) <= 10)
+        self.assertGreater(data['total_questions'], 10)
+
+    def test_get_pagination_failure(self):
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 404)
+        self.assertIn('Not Found', data['message'])
+
+    # ----------------------------------------------
+    # Test POST:/questions
+    # ----------------------------------------------
     def test_create_new_question(self):
-        """Test POST: /questions"""
         new_question = {
             'question': 'What is the capital of Autralia?',
             'answer': 'Canberra',
@@ -133,6 +195,22 @@ class TriviaTestCase(unittest.TestCase):
             print(f"Incomplete question response data content: {res.data}")
             self.fail("Failed to decode JSON response for incomplete question")
 
+    def test_create_question_failure(self):
+        new_question = {
+            'question': 'Test question',
+        }
+
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 422)
+        self.assertIn('Request data is incomplete', data['message'])
+
+    # ----------------------------------------------
+    # Test DELETE:/questions
+    # ----------------------------------------------
     def test_delete_question(self):
         question = Question(
             question='What is the capital of France?',
@@ -151,6 +229,18 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get(f'/questions/{question.id}')
         self.assertEqual(res.status_code, 404)
 
+    def test_delete_question_failure(self):
+        res = self.client().delete('/questions/99999')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 404)
+        self.assertIn('Question not found', data['message'])
+
+    # ----------------------------------------------
+    # Test Search
+    # ----------------------------------------------
     def test_search_questions(self):
         question1 = Question(
             question='What is the capital of France?',
@@ -244,6 +334,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(data['message'], 'Not Found')
 
+    def test_search_questions_failure(self):
+        res = self.client().post('/questions/search', data='invalid json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 400)
+        self.assertIn('Bad Request', data['message'])
+
+    # ----------------------------------------------
+    # Test GET:/quiz
+    # ----------------------------------------------
     def test_play_quiz(self):
         # Create some test questions
         questions = [{'question': 'What is the capital of France?',
@@ -296,6 +398,20 @@ class TriviaTestCase(unittest.TestCase):
 
         # After multiple questions, we should have seen more than one category
         self.assertGreater(len(categories_seen), 1, "Questions were not from multiple categories")
+
+    def test_get_quiz_failure(self):
+        quiz_data = {
+            'previous_questions': 'invalid',
+            'quiz_category': 'invalid'
+        }
+
+        res = self.client().post('/quizzes', json=quiz_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertFalse(data['success'])
+        self.assertEqual(data['error'], 422)
+        self.assertIn('Unprocessable Entity', data['message'])
 
     def test_404_error(self):
         # Test case 1: Request a non-existent resource
