@@ -1,6 +1,6 @@
 # Trivia App
 
-This project is a full-stack web application for the API Development and Documentation modeule of the Full Stack Nanodegree from Udacity.
+This project is a full-stack web application for the API Development and Documentation module of the Full Stack Nanodegree from Udacity.
 
 The backend is built with Flask and SQLAlchemy, and the frontend is built with React. The application allows users to view questions, add new questions, search for questions, play a quiz game, and delete questions.
 
